@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Speech color changer</title>
+    <style>
+      body {background: white; }
+      #view-source {
+                position: fixed;
+                display: block;
+                right: 0;
+                bottom: 0;
+                margin-right: 40px;
+                margin-bottom: 40px;
+                z-index: 900;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/sdkcarlos/artyom.js@master/build/artyom.window.min.js"></script>
+    <script>
+      window.artyom = window.artyom || new Artyom();
+    </script>
+  </head>
+  <body>
+    <h1>Speech recognition</h1>
+    <div><p>Recognizing text: <span id='recognized-text'></span></p></div>
+    <div><label>Captured text<br><textarea rows=10 cols=40 id='listening-text'></textarea></h5></div>
+    <div><input name="accepts" type = "checkbox"> listenining</div>
+    <div id='commands-container'></div>
+    <script>    
+    artyom.addCommands([
+        {
+          description:"It will save the text it recognizes.",
+          indexes: ["*"],
+          smart:true,
+          action : function(i, wildcard, sentence){            
+            if(wildcard.includes("stop listening")){
+              $('[name="accepts"]').prop('checked', false);
+              console.log("Stop listening checked")
+            }
+            if($('[name="accepts"]').prop('checked') == true) {
+              var sel = $('#listening-text');                     
+              sel.html(sel.html()+'\n'+wildcard);              
+            }
+            if(wildcard.includes("start listening")){
+              $('[name="accepts"]').prop('checked', true);
+              console.log("Start listening checked")
+            }            
+          }
+      },
+    ]);
+    artyom.redirectRecognizedTextOutput(function(text, isFinal){
+        var sel = $('#recognized-text');
+        if(isFinal){
+            sel.html('');
+        }else{
+            sel.html(text);
+        }
+    });
+    function startArtyom() {
+        artyom.initialize({
+            lang:'en-US',
+            debug:true,
+            continuous:true,
+            listen:true,
+            executionKeyword:'now'
+        });
+    }
+    $(window).on("load", function(){            
+        startArtyom();
+    });
+    </script>
+  </body>
+</html>
